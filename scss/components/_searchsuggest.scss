@@ -1,0 +1,68 @@
+//
+// Suggests
+//
+.searchsuggest {
+    position: absolute;
+    right: -10px;
+    top: 100%;
+    width: 150%;
+    padding: 5px;
+    margin: 2px;
+    border: 1px solid color(ui);
+    border-radius: size(global,radius);
+    background: #FFF;
+    box-shadow: 0 0 5px rgba(#000,0.4);
+
+    a {
+        display: block;
+        padding: 3px;
+        text-decoration: none;
+        font-weight: 300;
+        color: color(font);
+
+        &:hover,
+        &:focus {
+            color: #333;
+            background: #F5F5F5;
+        }
+
+        span {
+            font-weight: bold;
+            padding-right: 5px;
+        }
+    }
+
+    input[type=submit] {
+        float: left;
+        padding: 2px;
+        font-size: size(small);
+        font-family: $base-font;
+        font-weight: 300;
+        border: none;
+        color: color(secondary);
+        text-decoration: underline;
+        background: transparent;
+        outline: none;
+
+        &:focus {
+            outline: 1px dotted #333;
+            background: #F5F5F5;
+        }
+    }
+}
+
+&__bottom {
+    @extend .clearfix;
+    padding: 8px 5px 5px 5px;
+    margin: 5px 0 0 0;
+    border-top: 1px solid color(ui);
+    line-height: 20px;
+}
+
+&__close {
+    float: right;
+    color: color(primary);
+    font-weight: 300;
+    text-decoration: underline;
+    cursor: pointer;
+}
