@@ -8,12 +8,17 @@
     var $form = $('.search__form'),
         $input = $form.find('input[type=text]'),
         $suggest = $('.searchsuggest'),
-        $message = $('.searchsuggest__message'),
-        $suggest_button = $suggest.find('input[type=submit]'),
-        suggests_visible = false,
-        suggests_retrieved = false,
-        max_aantal_suggest = 10,
-        template = '<li data-search="{{searchstring}}"><a href="{{url}}">{{section}}{{titel}}</a></li>';
+        $message = $('searchsuggest__message'),
+        $loader = $suggest.find('.loader'),
+        $suggestButton = $suggest.find('input[type=submit]'),
+
+        suggestsVisible = false,
+        suggestsRetrieved = false,
+
+        maxLengthSuggests = 10,
+        lengthForSearch = 3,
+        searchUrl = FW.Config.submap + 'searchresult/search?search=',
+        template = '<li data-search="{{searchstring}}"><a href="{{url}}">{{titel}}</a></li>';
 
     //
     // Hide suggest
@@ -21,8 +26,8 @@
     function hideSuggest() {
         $suggest.find('a:focus').blur();
         $suggest.addClass('visuallyhidden');
-        $message.addClass('visuallyhidden');
-        suggests_visible = false;
+        $message.addClass('hidden');
+        suggestsVisible = false;
     }
 
     //
@@ -30,7 +35,7 @@
     //
     function showSuggest() {
         $suggest.removeClass('visuallyhidden');
-        suggests_visible = true;
+        suggestsVisible = true;
     }
 
     //
@@ -40,38 +45,40 @@
         $suggest.find('ul').empty();
 
         // deze weer op false zetten zodat deze weer opgehaald kunnen worden
-        suggests_retrieved = false;
+        suggestsRetrieved = false;
     }
 
     //
     // Get suggest
     //
     function getSuggest( searchvalue ) {
-        $.getJSON( "searchsuggest.json?search=" + searchvalue, function( data ) {
+        $.getJSON( searchUrl + searchvalue, function( data ) {
             var items = [];
+
+            $loader.addClass('hidden');
 
             if( data.length > 0 ) {
                 $.each( data, function( key, val ) {
-                    if(val.sectionhandle != "hoofdmenu") {
-                        var tplhtml = template
-                                        .replace( /{{searchstring}}/ig, val.searchstring.toLowerCase() )
-                                        .replace( /{{url}}/ig, val.url )
-                                        .replace( /{{section}}/ig, val.section == '' ? '' : '<span>' + val.section + '</span>' )
-                                        .replace( /{{titel}}/ig, val.titel )
-                        items.push( tplhtml );
-                    }
+                    var tplhtml = template
+                                    .replace( /{{searchstring}}/ig, val.searchstring.toLowerCase() )
+                                    .replace( /{{url}}/ig, val.url )
+                                    .replace( /{{titel}}/ig, val.titel )
+                    items.push( tplhtml );
                 });
 
                 $('.search__form').find('ul').html( items.join('') );
                 showSuggest();
 
-                // Resultaten ontvangen op true zetten
-                suggests_retrieved = true;
-
                 // Even voor de zekerheid filteren op huidige waarde in zoekveld
                 // omdat misschien de bezoeker al heeft doorgetypt terwijl het resultaat nog niet is opgehaald
                 filterSuggest( $input.val() );
             }
+        }).fail(function() {
+            $loader.addClass('hidden');
+            $message.removeClass('hidden');
+
+            // Resultaten ontvangen op true zetten
+            suggestsRetrieved = false;
         });
     }
 
@@ -88,19 +95,19 @@
         $suggest.find('li').addClass('visuallyhidden');
 
         if( total_matches > 0 ) {
-            $matches.filter(':lt(' + max_aantal_suggest + ')').removeClass('visuallyhidden');
+            $matches.filter(':lt(' + maxLengthSuggests + ')').removeClass('visuallyhidden');
 
-            if( !$message.hasClass('visuallyhidden') ) {
-                $message.addClass('visuallyhidden');
+            if( !$message.hasClass('hidden') ) {
+                $message.addClass('hidden');
             }
         }
         else {
-            if( $message.hasClass('visuallyhidden') ) {
-                $message.removeClass('visuallyhidden');
+            if( $message.hasClass('hidden') && suggestsRetrieved ) {
+                $message.removeClass('hidden');
             }
         }
 
-        total_matches > max_aantal_suggest ? $suggest_button.show() : $suggest_button.hide();
+        total_matches > maxLengthSuggests ? $suggestButton.show() : $suggestButton.hide();
     }
 
 
@@ -111,7 +118,7 @@
 
         var input_focus_and_suggest_visible = $input.is(':focus') && !$suggest.hasClass('visuallyhidden');
 
-        if( input_focus_and_suggest_visible || $suggest.find('a:focus').length > 0 || $suggest_button.is(':focus') ) {
+        if( input_focus_and_suggest_visible || $suggest.find('a:focus').length > 0 || $suggestButton.is(':focus') ) {
             var $visible_items = $suggest.find('li:not(.visuallyhidden)'),
                 $focused_item = $visible_items.find('a:focus');
 
@@ -121,8 +128,8 @@
                 case 'up':
                     // Als focus in zoekveld staat, dan button 'alle' of laatste item
                     if( input_focus_and_suggest_visible ) {
-                        if( $suggest_button.is(':visible') ) {
-                            $suggest_button.focus();
+                        if( $suggestButton.is(':visible') ) {
+                            $suggestButton.focus();
                         }
                         else {
                             $visible_items.last().find('a').focus();
@@ -144,7 +151,7 @@
                     }
 
                     // Als button is gefocused dan laatste item
-                    if( $suggest_button.is(':focus') ) {
+                    if( $suggestButton.is(':focus') ) {
                         $visible_items.last().find('a').focus();
                         return;
                     }
@@ -167,8 +174,8 @@
 
                     // Laatste item? dan 'alle' focussen
                     if( $focused_item.length > 0 && $next_item.length == 0 ) {
-                        if( $suggest_button.is(':visible') ) {
-                            $suggest_button.focus();
+                        if( $suggestButton.is(':visible') ) {
+                            $suggestButton.focus();
                         }
                         else {
                             $input.focus();
@@ -178,7 +185,7 @@
 
 
                     // Als button is gefocusd dan naar zoeken
-                    if( $suggest_button.is(':focus') ) {
+                    if( $suggestButton.is(':focus') ) {
                         $input.focus();
                         return;
                     }
@@ -196,38 +203,42 @@
 
         var search_input = $(this).val();
 
-        // Value kleiner dan 3
-        if( search_input.length < 3 ) {
+        // Value kleiner dan 'lengthForSearch'
+        if( search_input.length < lengthForSearch ) {
             // Als de resultaten zichtbaar zijn, dan verbergen
-            if( suggests_visible ) { hideSuggest(); }
+            if( suggestsVisible ) { hideSuggest(); }
 
             // Als er resultaten zijn, dan deze leeggooien
-            if( suggests_retrieved ) { emptySuggest(); }
+            if( suggestsRetrieved ) { emptySuggest(); }
         }
 
-        // Value gelijk aan 3
-        if( search_input.length >= 3 ) {
+        // Value gelijk aan 'lengthForSearch'
+        if( search_input.length >= lengthForSearch ) {
             $form.removeClass('search__form--error');
 
             // Als er al resultaten zijn, bijvoorbeeld na een backspace vanaf lengte 4, dan alleen filteren
-            if( suggests_retrieved ) { filterSuggest( search_input ); }
+            if( suggestsRetrieved ) { filterSuggest( search_input ); }
 
             // Als er nog geen resultaten zijn, dan deze met ajax ophalen
-            if( !suggests_retrieved ) {
+            if( !suggestsRetrieved ) {
+                $loader.removeClass('hidden');
+                $message.addClass('hidden');
+                showSuggest();
+
                 getSuggest( search_input );
 
                 // Resultaten ontvangen op true zetten
-                suggests_retrieved = true;
+                suggestsRetrieved = true;
             }
         }
 
-        // Value groter dan 3
+        // Value groter dan 'lengthForSearch'
         // Alleen uitvoeren als er daadwerkelijk resultaten uit de ajax call zijn gekomen
-        if( search_input.length > 3 && suggests_retrieved ) {
+        if( search_input.length > lengthForSearch && suggestsRetrieved ) {
             filterSuggest( search_input );
 
             // Als de resultaten niet zichtbaar zijn, dan deze zichtbaar maken
-            if( !suggests_visible ) { showSuggest(); }
+            if( !suggestsVisible ) { showSuggest(); }
         }
     });
 
