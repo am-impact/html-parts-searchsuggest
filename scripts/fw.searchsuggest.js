@@ -1,6 +1,6 @@
 /**
  * FW.Config.searchUrl: '{{ actionUrl("amSearch/getResults", { template: "searchresult/search", sections: "product" })|raw }}'
- * Uit de ajaxrequest komt html: een lijst met li's. In de Craft startup is deze standaard toegevoegd
+ * Uit de ajaxrequest komt html: een lijst met li's. In de Craft startup is deze standaard toegevoegd. De plugin amnav is hiervoor nodig
  */
 (function() {
     var $search = $('.search'),
