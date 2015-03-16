@@ -3,9 +3,8 @@
 //
 .searchsuggest {
     position: absolute;
-    right: -10px;
+    right: 0;
     top: 100%;
-    width: 150%;
     padding: 5px;
     margin: 2px;
     border: 1px solid color(ui);
@@ -17,7 +16,6 @@
         display: block;
         padding: 3px;
         text-decoration: none;
-        font-weight: 300;
         color: color(font);
 
         &:hover,
@@ -35,11 +33,9 @@
     input[type=submit] {
         float: left;
         padding: 2px;
-        font-size: size(small);
         font-family: $base-font;
-        font-weight: 300;
         border: none;
-        color: color(secondary);
+        color: color(text);
         text-decoration: underline;
         background: transparent;
         outline: none;
@@ -60,8 +56,7 @@
 
     &__close {
         float: right;
-        color: color(primary);
-        font-weight: 300;
+        color: color(text);
         text-decoration: underline;
         cursor: pointer;
     }
