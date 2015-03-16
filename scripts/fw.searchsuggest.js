@@ -37,14 +37,14 @@
             url: FW.Config.searchUrl,
             data: { 'searchQuery': val }
         }).done(function(data) {
-            if( data.html.length < 9 ) {
+            if( data.length < 9 ) {
                 $message.removeClass('hidden');
             }
             else {
                 $message.addClass('hidden');
             }
 
-            $search.find('ul').html( data.html );
+            $search.find('ul').html( data );
             $suggest.removeClass('visuallyhidden');
             $loader.addClass('hidden');
         });

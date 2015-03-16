@@ -49,20 +49,20 @@
             background: #F5F5F5;
         }
     }
-}
 
-&__bottom {
-    @extend .clearfix;
-    padding: 8px 5px 5px 5px;
-    margin: 5px 0 0 0;
-    border-top: 1px solid color(ui);
-    line-height: 20px;
-}
+    &__bottom {
+        @extend .clearfix;
+        padding: 8px 5px 5px 5px;
+        margin: 5px 0 0 0;
+        border-top: 1px solid color(ui);
+        line-height: 20px;
+    }
 
-&__close {
-    float: right;
-    color: color(primary);
-    font-weight: 300;
-    text-decoration: underline;
-    cursor: pointer;
+    &__close {
+        float: right;
+        color: color(primary);
+        font-weight: 300;
+        text-decoration: underline;
+        cursor: pointer;
+    }
 }
